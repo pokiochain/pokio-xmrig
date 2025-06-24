@@ -144,7 +144,10 @@ void xmrig::BaseTransform::transform(rapidjson::Document &doc, int key, const ch
             delete [] user;
         }
         break;
-
+	case IConfig::PokioKey:
+	{
+		return add(doc, Pools::kPools, Pool::kPokio, arg);
+	}
     case IConfig::UrlKey:    /* --url */
     case IConfig::StressKey: /* --stress */
     {

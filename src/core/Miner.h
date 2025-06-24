@@ -34,6 +34,8 @@
 namespace xmrig {
 
 extern double g_last_10m_hashrate;
+extern std::string g_current_blob;
+extern std::string g_current_seed;
 
 class Controller;
 class Job;

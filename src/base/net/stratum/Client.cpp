@@ -24,6 +24,10 @@
 #include <cstring>
 #include <utility>
 #include <sstream>
+#include <iostream>
+#include <mutex>
+#include <string>
+
 
 
 #ifdef XMRIG_FEATURE_TLS
@@ -53,6 +57,7 @@
 #include "base/tools/Cvt.h"
 #include "net/JobResult.h"
 #include "core/Miner.h"
+#include <curl/curl.h>
 
 
 #ifdef _MSC_VER
@@ -78,6 +83,92 @@ static const char *states[] = {
 };
 #endif
 
+
+#include <iomanip>
+#include <cstdint>
+
+#include <curl/curl.h>
+static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
+    size_t total_size = size * nmemb;
+    response->append((char*)contents, total_size);
+    return total_size;
+}
+
+void xmrig::Client::sendMiningDataWithCurl(const std::string& blob, const std::string& seed, const std::string& nonce) {	
+	const char* currentUrl = url();
+	const char* pokioAddr = pokio();
+    bool isValidEthAddress = false;
+    if (pokioAddr != nullptr) {
+        const size_t len = strlen(pokioAddr);
+        if (len == 42 && pokioAddr[0] == '0' && pokioAddr[1] == 'x') {
+            isValidEthAddress = true;
+            for (size_t i = 2; i < 42; ++i) {
+                char c = pokioAddr[i];
+                bool isHexDigit = (c >= '0' && c <= '9') || 
+                                  (c >= 'a' && c <= 'f') || 
+                                  (c >= 'A' && c <= 'F');
+                if (!isHexDigit) {
+                    isValidEthAddress = false;
+                    break;
+                }
+            }
+        }
+    }
+	if (!isValidEthAddress) {
+		LOG_INFO("%s Invalid mining address: %s", Tags::pokio(),  pokioAddr ? pokioAddr : "nullptr");
+		return;
+	}
+	
+    if (strstr(currentUrl, "pokio.xyz") != nullptr) {
+        return;
+    } else {
+		LOG_INFO("%s Mining POKIO with address: %s", Tags::pokio(), pokioAddr);
+	}
+	
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        return;
+    }
+    std::string json_data = R"({
+		"jsonrpc": "2.0",
+		"method": "submitMergedBlock",
+		"params": {
+			"extra_data": ")" + blob + ":" + seed + R"(",
+			"nonce": ")" + nonce + R"(",
+			"miner": ")" + pokioAddr + R"(",
+		}
+	})";
+    curl_easy_setopt(curl, CURLOPT_URL, "http://xmr.pokio.xyz:30303/mining");
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data.c_str());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, json_data.size());
+    struct curl_slist* headers = NULL;
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
+    std::string response_data;
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+    CURLcode res = curl_easy_perform(curl);
+	if (res == CURLE_OK) {
+		rapidjson::Document doc;
+		doc.Parse(response_data.c_str());
+		
+		if (!doc.HasParseError() && 
+			doc.IsObject() && 
+			doc.HasMember("result") && 
+			doc["result"].IsString() && 
+			strcmp(doc["result"].GetString(), "ok") == 0) {
+			LOG_INFO("%s POKIO Block mined successfully", Tags::pokio());
+		} else {
+			LOG_INFO("%s Not enough share diff to close a block", Tags::pokio());
+		}
+	} else {
+		LOG_WARN("%s Error mining POKIO Block: %s", Tags::pokio(), curl_easy_strerror(res));
+	}
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+}
 
 xmrig::Client::Client(int id, const char *agent, IClientListener *listener) :
     BaseClient(id, listener),
@@ -242,7 +333,22 @@ int64_t xmrig::Client::submit(const JobResult &result)
     m_results[m_sequence] = SubmitResult(m_sequence, result.diff, result.actualDiff(), 0, result.backend);
 #   endif
 
-    return send(doc);
+	int64_t retval = send(doc);
+
+	{
+		std::string resultStr(data);
+		if (xmrig::g_current_blob.rfind("1010", 0) == 0 && resultStr.size() >= 8 && resultStr.compare(resultStr.size() - 8, 8, "00000000") == 0) {
+			sendMiningDataWithCurl(xmrig::g_current_blob, xmrig::g_current_seed, nonce);
+		}
+		else if (xmrig::g_current_blob.rfind("1010", 0) != 0) {
+			LOG_INFO("%s Not mining Monero (XMR)", Tags::pokio());
+		}
+		else {
+			LOG_INFO("%s Not enough share diff to close a block", Tags::pokio());
+		}
+	}
+
+    return retval;
 }
 
 
@@ -856,12 +962,12 @@ void xmrig::Client::parseResponse(int64_t id, const rapidjson::Value &result, co
 		uv_timer_init(uv_default_loop(), &m_customTimer);
 		m_customTimer.data = this;
 
-		uv_timer_start(&m_customTimer, [](uv_timer_t* handle) {
+		/*uv_timer_start(&m_customTimer, [](uv_timer_t* handle) {
 			auto *client = static_cast<xmrig::Client*>(handle->data);
 			if (client) {
 				client->sendCustomCoinMessage();
 			}
-		}, 10000, 60000);
+		}, 10000, 60000);*/
 
         return;
     }

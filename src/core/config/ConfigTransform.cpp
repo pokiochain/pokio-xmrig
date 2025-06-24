@@ -122,6 +122,7 @@ void xmrig::ConfigTransform::transform(rapidjson::Document &doc, int key, const 
     BaseTransform::transform(doc, key, arg);
 
     switch (key) {
+
     case IConfig::AVKey:           /* --av */
     case IConfig::CPUPriorityKey:  /* --cpu-priority */
     case IConfig::ThreadsKey:      /* --threads */

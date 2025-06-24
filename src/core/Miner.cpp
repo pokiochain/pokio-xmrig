@@ -36,6 +36,7 @@
 #include "core/config/Config.h"
 #include "core/Controller.h"
 #include "crypto/common/Nonce.h"
+#include "base/tools/Cvt.h"
 #include "version.h"
 
 
@@ -71,7 +72,8 @@ namespace xmrig {
 
 
 double g_last_10m_hashrate = 0.0;
-
+std::string g_current_blob;
+std::string g_current_seed;
 static std::mutex mutex;
 
 
@@ -556,6 +558,15 @@ void xmrig::Miner::setEnabled(bool enabled)
 
 void xmrig::Miner::setJob(const Job &job, bool donate)
 {
+	
+	{
+		std::lock_guard<std::mutex> lock(mutex);
+		std::vector<char> hexBuffer(job.size() * 2 + 1);
+		Cvt::toHex(hexBuffer.data(), hexBuffer.size(), job.blob(), job.size());
+		g_current_blob.assign(hexBuffer.data());
+		g_current_seed.assign(Cvt::toHex(job.seed()).data());
+	}
+	
     for (IBackend *backend : d_ptr->backends) {
         backend->prepare(job);
     }

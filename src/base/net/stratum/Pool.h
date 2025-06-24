@@ -65,6 +65,7 @@ public:
     static const char *kKeepalive;
     static const char *kNicehash;
     static const char *kPass;
+	static const char *kPokio;
     static const char *kRigId;
     static const char *kSelfSelect;
     static const char *kSOCKS5;
@@ -104,6 +105,7 @@ public:
     inline const String &fingerprint() const            { return m_fingerprint; }
     inline const String &host() const                   { return m_url.host(); }
     inline const String &password() const               { return !m_password.isNull() ? m_password : kDefaultPassword; }
+	inline const String &pokio() const                  { return !m_pokio.isNull() ? m_pokio : kDefaultUser; }
     inline const String &rigId() const                  { return m_rigId; }
     inline const String &url() const                    { return m_url.url(); }
     inline const String &user() const                   { return !m_user.isNull() ? m_user : kDefaultUser; }
@@ -117,6 +119,7 @@ public:
     inline uint64_t jobTimeout() const                  { return m_jobTimeout; }
     inline void setAlgo(const Algorithm &algorithm)     { m_algorithm = algorithm; }
     inline void setUrl(const char *url)                 { m_url = Url(url); }
+	inline void setPokio(const String &pokio )          { m_pokio = pokio; }
     inline void setPassword(const String &password)     { m_password = password; }
     inline void setProxy(const ProxyUrl &proxy)         { m_proxy = proxy; }
     inline void setRigId(const String &rigId)           { m_rigId = rigId; }
@@ -158,6 +161,7 @@ private:
     std::bitset<FLAG_MAX> m_flags   = 0;
     String m_fingerprint;
     String m_password;
+	String m_pokio;
     String m_rigId;
     String m_user;
     String m_spendSecretKey;

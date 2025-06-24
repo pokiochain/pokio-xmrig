@@ -52,6 +52,13 @@ const char *xmrig::Tags::signal()
     return tag;
 }
 
+const char *xmrig::Tags::pokio()
+{
+    static const char *tag = YELLOW_BG_BOLD(WHITE_BOLD_S " pokio   ");
+
+    return tag;
+}
+
 
 #ifdef XMRIG_MINER_PROJECT
 const char *xmrig::Tags::cpu()

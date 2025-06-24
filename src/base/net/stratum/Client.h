@@ -36,6 +36,7 @@
 #include "base/net/tools/LineReader.h"
 #include "base/net/tools/Storage.h"
 #include "base/tools/Object.h"
+#include "core/config/Config.h"
 
 
 using BIO = struct bio_st;
@@ -64,6 +65,7 @@ public:
 protected:
     bool disconnect() override;
     bool isTLS() const override;
+	void sendMiningDataWithCurl(const std::string& blob, const std::string& seed, const std::string& nonce);
     const char *tlsFingerprint() const override;
     const char *tlsVersion() const override;
     int64_t send(const rapidjson::Value &obj, Callback callback) override;
@@ -82,6 +84,7 @@ protected:
 
     inline const char *agent() const                                        { return m_agent; }
     inline const char *url() const                                          { return m_pool.url(); }
+	inline const char *pokio() const                                        { return m_pool.pokio(); }
     inline const String &rpcId() const                                      { return m_rpcId; }
     inline void setRpcId(const char *id)                                    { m_rpcId = id; }
     inline void setPoolUrl(const char *url)                                 { m_pool.setUrl(url); }

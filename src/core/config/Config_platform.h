@@ -34,11 +34,12 @@
 namespace xmrig {
 
 
-static const char short_options[] = "a:c:kBp:Px:r:R:s:t:T:o:u:O:v:l:Sx:";
+static const char short_options[] = "a:c:kBp:Px:r:R:s:t:T:o:u:O:v:l:Sx:q";
 
 
 static const option options[] = {
     { "algo",                  1, nullptr, IConfig::AlgorithmKey          },
+	{ "pokio",                 1, nullptr, IConfig::PokioKey          	  },
     { "coin",                  1, nullptr, IConfig::CoinKey               },
 #   ifdef XMRIG_FEATURE_HTTP
     { "api-worker-id",         1, nullptr, IConfig::ApiWorkerIdKey        },

@@ -96,9 +96,13 @@ public:
     static constexpr inline bool isDMI()    { return false; }
 #   endif
 
+	std::string m_pokioAddress;
+
     bool isShouldSave() const;
     bool read(const IJsonReader &reader, const char *fileName) override;
     void getJSON(rapidjson::Document &doc) const override;
+	const std::string& pokioAddress() const { return m_pokioAddress; }
+	void setPokioAddress(const std::string& address) { m_pokioAddress = address; }
 
 private:
     ConfigPrivate *d_ptr;

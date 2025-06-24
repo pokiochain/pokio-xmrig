@@ -72,6 +72,7 @@ const char *Pool::kFingerprint            = "tls-fingerprint";
 const char *Pool::kKeepalive              = "keepalive";
 const char *Pool::kNicehash               = "nicehash";
 const char *Pool::kPass                   = "pass";
+const char *Pool::kPokio                  = "0x";
 const char *Pool::kRigId                  = "rig-id";
 const char *Pool::kSelfSelect             = "self-select";
 const char *Pool::kSOCKS5                 = "socks5";
@@ -125,6 +126,7 @@ xmrig::Pool::Pool(const rapidjson::Value &object) :
     m_user           = Json::getString(object, kUser);
     m_spendSecretKey = Json::getString(object, kSpendSecretKey);
     m_password       = Json::getString(object, kPass);
+	m_pokio          = Json::getString(object, kPokio);
     m_rigId          = Json::getString(object, kRigId);
     m_fingerprint    = Json::getString(object, kFingerprint);
     m_pollInterval   = Json::getUint64(object, kDaemonPollInterval, kDefaultPollInterval);
