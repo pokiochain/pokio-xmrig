@@ -197,6 +197,15 @@ add_definitions(-D__STDC_FORMAT_MACROS -DUNICODE -D_FILE_OFFSET_BITS=64)
 
 find_package(UV REQUIRED)
 
+cmake_policy(SET CMP0074 NEW)
+find_package(CURL REQUIRED)
+find_package(ZLIB REQUIRED)
+message(STATUS "cURL include dir: ${CURL_INCLUDE_DIRS}")
+message(STATUS "cURL libraries : ${CURL_LIBRARIES}")
+message(STATUS "ZLIB include dir: ${ZLIB_INCLUDE_DIRS}")
+message(STATUS "ZLIB libraries  : ${ZLIB_LIBRARIES}")
+include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+
 include(cmake/flags.cmake)
 include(cmake/randomx.cmake)
 include(cmake/argon2.cmake)
@@ -237,7 +246,20 @@ if (WITH_DEBUG_LOG)
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME} ${HEADERS} ${SOURCES} ${SOURCES_OS} ${HEADERS_CRYPTO} ${SOURCES_CRYPTO} ${SOURCES_SYSLOG} ${TLS_SOURCES} ${XMRIG_ASM_SOURCES})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${XMRIG_ASM_LIBRARY} ${OPENSSL_LIBRARIES} ${UV_LIBRARIES} ${EXTRA_LIBS} ${CPUID_LIB} ${ARGON2_LIBRARY} ${ETHASH_LIBRARY} ${GHOSTRIDER_LIBRARY})
+
+target_link_libraries(${CMAKE_PROJECT_NAME} 
+    ${ZLIB_LIBRARIES}
+    ${XMRIG_ASM_LIBRARY}
+    ${OPENSSL_LIBRARIES}
+    ${UV_LIBRARIES}
+    ${EXTRA_LIBS}
+    ${CPUID_LIB}
+    ${ARGON2_LIBRARY}
+    ${ETHASH_LIBRARY}
+    ${GHOSTRIDER_LIBRARY}
+    ${CURL_LIBRARIES}
+)
+
 
 if (WIN32)
     add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/bin/WinRing0/WinRing0x64.sys" $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)

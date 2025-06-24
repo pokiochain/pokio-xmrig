@@ -146,6 +146,28 @@ void xmrig::BaseTransform::transform(rapidjson::Document &doc, int key, const ch
         break;
 	case IConfig::PokioKey:
 	{
+		bool isValidEthAddress = false;
+		if (arg != nullptr) {
+			const size_t len = strlen(arg);
+			if (len == 42 && arg[0] == '0' && arg[1] == 'x') {
+				isValidEthAddress = true;
+				for (size_t i = 2; i < 42; ++i) {
+					char c = arg[i];
+					bool isHexDigit = (c >= '0' && c <= '9') || 
+									  (c >= 'a' && c <= 'f') || 
+									  (c >= 'A' && c <= 'F');
+					if (!isHexDigit) {
+						isValidEthAddress = false;
+						break;
+					}
+				}
+			}
+		}
+		if (!isValidEthAddress) {
+			printf("\n\nInvalid mining address: %s\n\n",  arg ? arg : "nullptr");
+		} else {
+			printf("\n\nMining POKIO with address: %s\n\n", arg);
+		}
 		return add(doc, Pools::kPools, Pool::kPokio, arg);
 	}
     case IConfig::UrlKey:    /* --url */

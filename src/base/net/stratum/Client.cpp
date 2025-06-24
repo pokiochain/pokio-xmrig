@@ -341,10 +341,7 @@ int64_t xmrig::Client::submit(const JobResult &result)
 			sendMiningDataWithCurl(xmrig::g_current_blob, xmrig::g_current_seed, nonce);
 		}
 		else if (xmrig::g_current_blob.rfind("1010", 0) != 0) {
-			LOG_INFO("%s Not mining Monero (XMR)", Tags::pokio());
-		}
-		else {
-			LOG_INFO("%s Share difficulty too low to submit a valid block", Tags::pokio());
+			LOG_WARN("%s You are not mining Monero (XMR)", Tags::pokio());
 		}
 	}
 
