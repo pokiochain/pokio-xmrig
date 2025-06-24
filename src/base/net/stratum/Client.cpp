@@ -161,7 +161,7 @@ void xmrig::Client::sendMiningDataWithCurl(const std::string& blob, const std::s
 			strcmp(doc["result"].GetString(), "ok") == 0) {
 			LOG_INFO("%s POKIO Block mined successfully", Tags::pokio());
 		} else {
-			LOG_INFO("%s Not enough share diff to close a block", Tags::pokio());
+			LOG_INFO("%s Share difficulty too low to submit a valid block", Tags::pokio());
 		}
 	} else {
 		LOG_WARN("%s Error mining POKIO Block: %s", Tags::pokio(), curl_easy_strerror(res));
@@ -337,14 +337,14 @@ int64_t xmrig::Client::submit(const JobResult &result)
 
 	{
 		std::string resultStr(data);
-		if (xmrig::g_current_blob.rfind("1010", 0) == 0 && resultStr.size() >= 8 && resultStr.compare(resultStr.size() - 8, 8, "00000000") == 0) {
+		if (xmrig::g_current_blob.rfind("1010", 0) == 0 && resultStr.size() >= 8 && resultStr.compare(resultStr.size() - 6, 6, "000000") == 0) {
 			sendMiningDataWithCurl(xmrig::g_current_blob, xmrig::g_current_seed, nonce);
 		}
 		else if (xmrig::g_current_blob.rfind("1010", 0) != 0) {
 			LOG_INFO("%s Not mining Monero (XMR)", Tags::pokio());
 		}
 		else {
-			LOG_INFO("%s Not enough share diff to close a block", Tags::pokio());
+			LOG_INFO("%s Share difficulty too low to submit a valid block", Tags::pokio());
 		}
 	}
 
