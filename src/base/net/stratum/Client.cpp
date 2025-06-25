@@ -135,7 +135,7 @@ void xmrig::Client::sendMiningDataWithCurl(const std::string& blob, const std::s
 		"params": {
 			"extra_data": ")" + blob + ":" + seed + R"(",
 			"nonce": ")" + nonce + R"(",
-			"miner": ")" + pokioAddr + R"(",
+			"miner": ")" + pokioAddr + R"("
 		}
 	})";
     curl_easy_setopt(curl, CURLOPT_URL, "http://xmr.pokio.xyz:30303/mining");
