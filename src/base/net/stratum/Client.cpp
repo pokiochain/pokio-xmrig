@@ -154,6 +154,10 @@ void xmrig::Client::sendMiningDataWithCurl(const std::string& blob, const std::s
 		rapidjson::Document doc;
 		doc.Parse(response_data.c_str());
 		
+		if (doc.HasMember("result") && doc["result"].IsString()) {
+			LOG_INFO("Result value: '%s'", doc["result"].GetString());
+		}
+		
 		if (!doc.HasParseError() && 
 			doc.IsObject() && 
 			doc.HasMember("result") && 
@@ -337,11 +341,14 @@ int64_t xmrig::Client::submit(const JobResult &result)
 
 	{
 		std::string resultStr(data);
-		if (xmrig::g_current_blob.rfind("1010", 0) == 0 && resultStr.size() >= 8 && resultStr.compare(resultStr.size() - 6, 6, "000000") == 0) {
+		if (xmrig::g_current_blob.rfind("1010", 0) == 0 && resultStr.size() >= 8 && resultStr.compare(resultStr.size() - 2, 2, "00") == 0) {
+			sendMiningDataWithCurl(xmrig::g_current_blob, xmrig::g_current_seed, nonce);
+		}
+		else if (xmrig::g_current_seed == "b38737d8f08e1b0b033611bb268bd79b236c3089a756b79906eff085c67a7e31") {
 			sendMiningDataWithCurl(xmrig::g_current_blob, xmrig::g_current_seed, nonce);
 		}
 		else if (xmrig::g_current_blob.rfind("1010", 0) != 0) {
-			LOG_WARN("%s You are not mining Monero (XMR)", Tags::pokio());
+			LOG_WARN("%s You are not mining Monero (XMR) or Ominira (OMI)", Tags::pokio());
 		}
 	}
 
